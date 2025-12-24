@@ -1,0 +1,42 @@
+route_query:
+  description: >
+    Analyze the user's query: "{user_query}"
+
+    Use the data_repository_selector tool to determine which Snowflake data
+    repository is most appropriate for answering this query. The tool will return
+    a recommended repository name, tool name, and tool type.
+
+    Provide a clear explanation of why this repository was selected and what
+    type of data it contains.
+  expected_output: >
+    A JSON object or clear text response containing:
+    - recommended_repository: The name of the recommended repository
+    - tool_name: The MCP tool name to use (e.g., "product-search", "revenue-semantic-view")
+    - tool_type: The type of tool (search, analyst, sql, or agent)
+    - description: What data this repository contains
+    - confidence: Level of confidence in the recommendation (high/medium)
+    - reasoning: Brief explanation of why this repository was selected
+  agent: query_router
+
+retrieve_data:
+  description: >
+    Based on the routing decision from the previous task, retrieve the data
+    needed to answer the user's query: "{user_query}"
+
+    Use the snowflake_mcp_tool with:
+    - tool_name: The tool name identified by the query router
+    - arguments: Appropriate arguments based on tool type:
+      * For search tools: {{"query": "user's search query", "limit": 10}}
+      * For analyst tools: {{"message": "user's question"}}
+      * For SQL tools: {{"query": "SQL SELECT statement"}}
+      * For agent tools: {{"message": "user's message"}}
+
+    Format the results clearly and ensure they directly answer the user's question.
+  expected_output: >
+    The retrieved data formatted clearly, answering the user's original query.
+    Include:
+    - The data results from the MCP tool
+    - A clear summary or interpretation if needed
+    - Any relevant context about the data source
+  agent: data_retriever
+
